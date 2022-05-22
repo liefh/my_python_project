@@ -1,0 +1,11 @@
+
+# mysql connect
+[mysql_service]
+url = '10.1.1.1'
+port = 3306
+user='ipfs'
+passwd = 'Ipfs@123'
+db_name = 'lotus_for_nb04'
+
+
+

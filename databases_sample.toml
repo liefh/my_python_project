@@ -1,0 +1,7 @@
+# This is a sample config file.
+[mysql_service]
+url = '1.2.3.4'
+port = 3306
+user = 'my_name'
+passwd = 'my_passwd'
+db_name = 'my_db'
