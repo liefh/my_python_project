@@ -26,7 +26,7 @@ def datetime_to_epoch(my_datetime):
     return my_epoch
 
 
-def sectors_group(sectors_file, group_count, start_group_id, sectors_groups_file):
+def sectors_group_by_group(sectors_file, group_count, start_group_id, sectors_groups_file):
     import math
     with open(f'{sectors_file}') as rf:
         sectors_id = list()
@@ -50,9 +50,31 @@ def sectors_group(sectors_file, group_count, start_group_id, sectors_groups_file
         wf.flush()
 
 
-parser = argparse.ArgumentParser()
+def sectors_group_by_sector(sectors_file, sector_number, start_group_id, sectors_groups_file):
+    import math
+    with open(f'{sectors_file}') as rf:
+        sectors_id = list()
+        for sector_id in rf:
+            sector_id = int(sector_id.strip())
+            sectors_id.append(sector_id)
+            sectors_id.sort()
 
-subparsers = parser.add_subparsers(help='balabla')
+    sectors_per_group = sector_number
+
+    with open(f'{sectors_groups_file}', 'wt') as wf:
+        group_id = start_group_id
+        for group in range(0, len(sectors_id), sectors_per_group):
+            tmp_list = sectors_id[group:group + sectors_per_group]
+            print(
+                f'UPDATE task_groups SET group_id={group_id} WHERE sector_id BETWEEN {tmp_list[0]} AND {tmp_list[-1]};')
+            for sector_id in tmp_list:
+                wf.write(f'UPDATE task_groups SET group_id={group_id} WHERE sector_id={sector_id};')
+                wf.write('\n')
+            group_id = group_id + 1
+        wf.flush()
+
+
+parser = argparse.ArgumentParser()
 
 # add subparse : epoch_to_datetime
 subparser_epoch_to_datetime = subparsers.add_parser('epoch_to_datetime', help='epoch is converted to datetime')
@@ -67,12 +89,17 @@ subparser_datetime_to_epoch.set_defaults(function=datetime_to_epoch)
 # add subparse : sectors_group
 subparser_sectors_group = subparsers.add_parser('sectors_group', help='sectors were divided into groups averagely')
 subparser_sectors_group.add_argument('-i', '--input_file', type=str, help='input a file containing only sectors')
-subparser_sectors_group.add_argument('-c', '--group_count', type=int, help='group count')
+subparser_sectors_group.add_argument('-g', '--group_count', type=int, help='group count')
+subparser_sectors_group.add_argument('-n', '--sector_number', type=int, help='group count')
 subparser_sectors_group.add_argument('-s', '--start_group_id', type=int, help='start group id')
 subparser_sectors_group.add_argument('-o', '--output_file', type=str,
                                      help='output a file contained sector_id and group_id')
-subparser_sectors_group.set_defaults(function=sectors_group)
+args = parser.parse_args()
+if args.group_count:
+    subparser_sectors_group.set_defaults(function=sectors_group_by_group)
 
+if args.sector_number:
+    subparser_sectors_group.set_defaults(function=sectors_group_by_sector)
 args = parser.parse_args()
 
 try:
@@ -86,8 +113,11 @@ try:
     if getattr(args, 'function') == datetime_to_epoch:
         print(datetime_to_epoch(args.datetime))
 
-    if getattr(args, 'function') == sectors_group:
-        print(sectors_group(args.input_file, args.group_count, args.start_group_id, args.output_file))
+    if getattr(args, 'function') == sectors_group_by_group:
+        print(sectors_group_by_group(args.input_file, args.group_count, args.start_group_id, args.output_file))
+
+    if getattr(args, 'function') == sectors_group_by_sector:
+        print(sectors_group_by_sector(args.input_file, args.sector_number, args.start_group_id, args.output_file))
 
 except Exception as err:
     print(parser.print_usage())

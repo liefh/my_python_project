@@ -1,0 +1,36 @@
+[config]
+port = 4396
+sealerSleepDurationSeconds = 60
+lockLifeCircleMinutes = 20
+[config.sectorStoreZoneMap]
+"2048" = 2080
+"8388608" = 8538400
+"536870912" = 546457888
+"34359738368" = 34973305120
+
+
+
+
+[myDbConfig]
+dbConnectString='root:@tcp(localhost:3306)/wc-test?loc=Local&parseTime=true'
+dbType = 'mysql'
+dbDebugMode = true
+
+[testDbConfig]
+dbConnectString='root:123456@tcp(192.168.1.225:3306)/lotus-test-only?loc=Local&parseTime=true'
+dbType = 'mysql'
+dbDebugMode = true
+
+[[spyOnDbs]]
+miner = 'f01234'
+name = 'sz-01'
+dbConnectString='root:123456@tcp(192.168.1.225:3306)/lotus-test-only?loc=Local&parseTime=true'
+dbType = 'mysql'
+dbDebugMode = true
+
+[[spyOnDbs]]
+miner = 'f012345'
+name = 'sz-02'
+dbConnectString='root:123456@tcp(192.168.1.225:3306)/lotus-test-only?loc=Local&parseTime=true'
+dbType = 'mysql'
+dbDebugMode = true

@@ -264,3 +264,23 @@
 # print(context)
 # data_dic = json.loads(context)
 
+import toml
+
+data = toml.load('datas/db_toml.toml')
+
+# print(data)
+# print(data.items())
+# print(data.get('spyOnDbs'))
+
+for db_info in data.get('spyOnDbs'):
+    miner = db_info.get('miner')
+    name = db_info.get('name')
+    db_connect_string = db_info.get('dbConnectString')
+    db_type = db_info.get('dbType')
+    db_debug_mode = db_info.get('dbDebugMode')
+    print(miner,'\n',
+name,'\n',
+db_connect_string,'\n',
+db_type,'\n',
+db_debug_mode
+          )
