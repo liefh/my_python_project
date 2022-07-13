@@ -74,7 +74,10 @@ def sectors_group_by_sector(sectors_file, sector_number, start_group_id, sectors
         wf.flush()
 
 
+
 parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers()
+
 
 # add subparse : epoch_to_datetime
 subparser_epoch_to_datetime = subparsers.add_parser('epoch_to_datetime', help='epoch is converted to datetime')
