@@ -22,4 +22,4 @@ def sectors_group(sectors_file,group_count,start_group_id,sectors_groups_file):
             group_id = group_id + 1
         wf.flush()
 
-sectors_group('./sectors_id',6,10001,'./sectors_group')
+sectors_group('./nb61sector.txt',16,355,'./sectors_group_nb61')

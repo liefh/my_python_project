@@ -9,8 +9,20 @@
 # print(s)
 
 
-import  time
-print(time.time())
-print(time.localtime())
-print(time.localtime(time.time()))
-print(time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(time.time())))
+# import  time
+# print(time.time())
+# print(time.localtime())
+# print(time.localtime(time.time()))
+# print()time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(time.time()))
+
+
+
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(filename)s[line:%(lineno)d] %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%SZ',
+                    filemode='a')
+logger = logging.getLogger()
+logger.info('fdsa  fdafd fdfdds')
+
+
