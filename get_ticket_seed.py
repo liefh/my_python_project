@@ -1,47 +1,109 @@
-import  zlib,json
-#
-# with open('./datas/params','rb') as in_f:
-#     data_b = in_f.read()
-#
-#     decompress = zlib.decompressobj()
-#     data = decompress.decompress(data_b)
-#     print(data)
+
+# install dependence packages
+#pip3 install toml pymysql
+
+"""
+exit(-1): file not exist;
+exit(-2): content of file or data of input is none;
+exit(-3): mysql connect error;
+"""
 
 
-import  pymysql
-# url = 'rm-8vbz2h506pc2n324b7o.mysql.zhangbei.rds.aliyuncs.com'
-url = 'rm-8vbz2h506pc2n324b7o.mysql.zhangbei.rds.aliyuncs.com'
-db = 'lotus-bak'
-user='ipfs'
-passwd = 'Ipfs@123'
+def create_sample_file():
+    with open('./databases_sample.toml', 'wt') as wf:
+        wf.write('# This is a sample config file.\n')
+        wf.write('[mysql_service]\n')
+        wf.write("url = '1.2.3.4'\n")
+        wf.write('port = 3306\n')
+        wf.write("user = 'my_name'\n")
+        wf.write("passwd = 'my_passwd'\n")
+        wf.write("db_name = 'my_db'\n")
+        wf.flush()
 
 
-connect = pymysql.connect(host=url,port=3306,user=user,passwd=passwd,db=db,)
-cursor =connect.cursor(pymysql.cursors.DictCursor)
+def read_config_toml(file_path):
+    from pathlib import Path
+    import toml
+    path = Path(file_path)
+    if not path.exists():
+        print('databases.toml is not exist')
+        exit(-1)
+
+    config = toml.load(file_path)
+
+    if not config['mysql_service']:
+        print('config file is none,please check databases.toml')
+        exit(-2)
+
+    return config['mysql_service']
 
 
-with open('datas/f020330-sectorid.log','r') as rf:
-    for line in rf:
-        print(line)
-        sector_id = int(line)
-        sql = f'SELECT sector_id,params from task_params where task_id in (SELECT id FROM tasks WHERE task_type=4 and sector_id in ({sector_id}));'
-        # print(sql)
-        cursor.execute(sql)
-        results = cursor.fetchall()
-        # print(results)
-
-        for data_de in results:
-            # sector_id = data_de['sector_id']
-            params = data_de['params']
-            decompress = zlib.decompressobj()
-            data = decompress.decompress(params)
-            result = json.loads(data)
-            result_dict = {'sector_id': sector_id, 'ticket': result['ticket'], 'seed': result['seed']}
-            print(result_dict)
-            with open('datas/wl01_lotus_bak.json', 'a+') as f:
-                json.dump(result_dict,f)
-                json.dump(',',f)
+def connect_mysql(url, port, user, passwd, db_name):
+    import pymysql
+    try:
+        connect = pymysql.connect(host=url, port=port, user=user, passwd=passwd, db=db_name)
+        cursor = connect.cursor(pymysql.cursors.DictCursor)
+        cursor.execute('SELECT VERSION();')
+        result = cursor.fetchone()
+        if result:
+            print('mysql connect successfully!')
+        return cursor
+    except Exception as err:
+        print('mysql connect failed!')
+        print(err)
+        exit(-3)
 
 
+def date_uncompress_zlib(date_compressed):
+    import zlib, json
+    if not date_compressed:
+        print('The string of decompressed is none!')
+        exit(-2)
+    decompress_obj = zlib.decompressobj()
+    data_binary = decompress_obj.decompress(date_compressed)
+    # return a dict
+    return json.loads(data_binary)
 
-connect.close()
+
+if __name__ == '__main__':
+    import json
+    from pathlib import Path
+
+    create_sample_file()
+
+    path = Path('./sectors_id')
+    if not path.exists():
+        print('File is not existed, Please create sectors_id file in current directory.')
+        exit(-1)
+    if path.stat().st_size == 0:
+        print('The sectors_id file is none, make sure include all sector id in sectors_id file.')
+        exit(-2)
+
+    path = Path('./ticket_seed.json')
+    path.touch(exist_ok=True)
+    path.unlink()
+    path.touch()
+
+    config_dict = read_config_toml('./databases.toml')
+
+    cursor = connect_mysql(url=config_dict['url'],
+                           port=int(config_dict['port']),
+                           user=config_dict['user'],
+                           passwd=config_dict['passwd'],
+                           db_name=config_dict['db_name'])
+
+    with open('./sectors_id', 'r') as rf:
+        for sector_id in rf:
+            sector_id = sector_id.strip()
+            sql = f'SELECT params from task_params where task_id in (SELECT id FROM tasks WHERE task_type=4 and sector_id={sector_id});'
+            cursor.execute(sql)
+            params_fetch = cursor.fetchone()
+
+            params_compressed = params_fetch['params']
+            date_decompressed = date_uncompress_zlib(params_compressed)
+            result = {'sector_id': sector_id, 'ticket': date_decompressed['ticket'], 'seed': date_decompressed['seed']}
+            print(result)
+            with open('./ticket_seed.json', 'a+') as f:
+                json.dump(result, f)
+                f.write(',')
+    cursor.close()
