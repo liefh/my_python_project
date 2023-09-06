@@ -1,0 +1,29 @@
+# Default config:
+[API]
+ListenAddress = "/ip4/0.0.0.0/tcp/6789/http"
+#  Timeout = "30s"
+#
+[DbCfg]
+  Conn = "venus_wallet_pro:Wallet4mFBanpbAK5rRT@tcp(rm-j6c4b4a28u7b4fsed.mysql.rds.aliyuncs.com:3306)/wallet_hk01?charset=utf8mb4&parseTime=True&loc=Local"
+Type = "mysql"
+DebugMode = true
+#  Conn = ""
+#  Type = "mysql"
+#  DebugMode = true
+#
+[Authorizer]
+#  User = ""
+#  Pwd = ""
+#  Endpoint = "/ip4/localhost/tcp/9528/http"
+#
+[APIRegisterHubCfg]
+  #RegisterAPI = ["/ip4/120.78.173.116/tcp/45132","/ip4/120.24.71.149/tcp/45132","/ip4/123.60.52.124/tcp/45132","/ip4/121.37.166.20/tcp/45132"]
+  RegisterAPI = ["/ip4/8.219.167.105/tcp/45132","/ip4/8.219.206.117/tcp/45132"]
+  Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGstMDEtd2FsbGV0IiwicGVybSI6InJlYWQiLCJleHQiOiIifQ.rcNHiyArh_tESZxpWCYqvAQjVNqrmXRZaOR3dtWnIck"
+  SupportAccounts = ["hk-01"]
+#  Token = ""
+#
+[Metrics]
+#  Nickname = ""
+#  HeadNotifs = false
+#

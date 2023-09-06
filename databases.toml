@@ -1,10 +1,7 @@
 # mysql connect
 [mysql_service]
-url = 'rm-bp141zf8k44b1u3gloo.mysql.rds.aliyuncs.com'
+url = 'rm-wz96m9xlavjm70q7wno.mysql.rds.aliyuncs.com'
 port = 3306
 user='ipfs'
 passwd = 'Ipfs@123'
 db_name = 'lotus'
-
-
-

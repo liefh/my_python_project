@@ -9,18 +9,25 @@ miners_id_name = {
     'f01228089': 'hk04'
 }
 
-lotus_ip = {
-    'hk01': '20.2.1.27',
-    'hk02': '20.2.1.28',
-    'hk03': '20.2.1.29',
-    'hk04': '20.2.1.30'
-}
+# lotus_ip = {
+#     'hk01': '20.2.1.27',
+#     'hk02': '20.2.1.28',
+#     'hk03': '20.2.1.29',
+#     'hk04': '20.2.1.30'
+# }
 
 lotus_servers_ip = {
     'hk01': '47.242.42.180',
     'hk02': '47.242.239.152',
     'hk03': '8.210.93.104',
     'hk04': '8.210.32.230'
+}
+
+write_tokens = {
+    'hk01': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGstMDEtd2FsbGV0IiwicGVybSI6InJlYWQiLCJleHQiOiIifQ.rcNHiyArh_tESZxpWCYqvAQjVNqrmXRZaOR3dtWnIck',
+    'hk02': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGstMDIiLCJwZXJtIjoid3JpdGUiLCJleHQiOiIifQ.JjjjVYAlpHkHiBASGkzgpM5pWLPOAT3uIzZNO1Pj5gY',
+    'hk03': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGstMDMiLCJwZXJtIjoid3JpdGUiLCJleHQiOiIifQ.at-4WOFD1Z6MXaRsaVlyEnP1zawT8pLKGU-tCMNzwN4',
+    'hk04': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaGstMDQiLCJwZXJtIjoid3JpdGUiLCJleHQiOiIifQ.L0PpA_5_Rc1dpzmyfK7z1AT6ZLZUjqHfjiL6JiuHuSc'
 }
 
 this_date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(time.time()))
@@ -47,25 +54,28 @@ def exec_cmd(cmd):
 try:
     miner_name = miners_id_name.get(args.miner_id)
 
-    # 关停、备份老的业务和配置
-    exec_cmd('umount /mnt/qn')
-    exec_cmd('umount /mnt/qn')
+    # 关停老业务,备份老配置
+    exec_cmd('umount -lf /mnt/qn')
+    exec_cmd('umount -lf /mnt/qn')
     exec_cmd('supervisorctl stop window-poster winning-poster')
 
-    exec_cmd(f'mv /root/kodo-fcfs/fcfs.conf /root/kodo-fcfs/fcfs.conf_bak{this_date}')
-    exec_cmd(f'mv /home/fil/qiniu-cfg.toml /home/fil/qiniu-cfg.toml_bak{this_date}')
-    exec_cmd(f'cp -rf /home/fil/.lotus/api /home/fil/.lotus_bak{this_date}')
-    exec_cmd(f'mv /home/fil/.lotusposter /home/fil/.lotusposter_bak{this_date}')
+    exec_cmd(f'mv /root/kodo-fcfs/fcfs.conf /tmp/fcfs.conf_bak{this_date}')
+    exec_cmd(f'mv /home/fil/qiniu-cfg.toml /tmp/qiniu-cfg.toml_bak{this_date}')
+    exec_cmd(f'mv /home/fil/.lotus/token /tmp/.lotus/token_bak{this_date}')
+    exec_cmd(f'mv /home/fil/.lotusposter /tmp/.lotusposter_bak{this_date}')
 
-    # 修改配置
-    exec_cmd(f'cp /root/kodo-fcfs/fcfs.conf_{miner_name} /root/kodo-fcfs/fcfs.conf')
-    exec_cmd(f'cp /home/fil/qiniu-cfg.toml_{miner_name}  /home/fil/qiniu-cfg.toml')
+    # 准备配置文件
+    exec_cmd(f'cp /home/fil/hk01-02-03-04/fcfs.conf_{miner_name} /root/kodo-fcfs/fcfs.conf')
+    exec_cmd(f'cp /home/fil/hk01-02-03-04/qiniu-cfg.toml_{miner_name}  /home/fil/qiniu-cfg.toml')
 
+    exec_cmd(f'cp /home/fil/hk01-02-03-04/token_{miner_name} /home/fil/.lotus/token')
+    exec_cmd(f'sudo -u fil /home/fil/lotus-miner poster --mode=windows --server-api=http://{lotus_servers_ip.get(miner_name)}:3456')
+    exec_cmd('mv /home/fil/.lotusposter/config.toml /tmp/')
+    exec_cmd(f'cp /home/fil/hk01-02-03-04/config.toml_{miner_name} /home/fil/.lotusposter/config.toml')
     exec_cmd(
         f"sed -i '/^command/c command=/home/fil/lotus-miner poster --mode=windows --server-api=http://{lotus_servers_ip.get(miner_name)}:3456' /etc/supervisord.d/winning-poster.ini")
     exec_cmd(
         f'''sed -i '/^scheduler_url/c scheduler_url = "http://{lotus_servers_ip.get(miner_name)}:3456"' /home/fil/config.toml''')
-    exec_cmd(f"echo '/ip4/{lotus_ip.get(miner_name)}/tcp/1234/http' > /home/fil/.lotus/api")
 
     # 启动
     exec_cmd('/root/kodo-fcfs/fcfs.sh -e -s 1> /root/kodo-fcfs/fcfs.log 2>&1 &')

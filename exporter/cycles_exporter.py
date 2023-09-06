@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import json
-import time
-import random
-import logging
 import datetime
-import traceback
+import json
+import logging
+import os
 import subprocess
+import time
+import traceback
 
 import prometheus_client
-
-import logging
-from logging import handlers
 
 # handler = handlers.RotatingFileHandler("all.log", mode="a", maxBytes=1024 * 1024 * 10, backupCount=5, encoding="utf-8")
 logging.basicConfig(level=logging.DEBUG,
@@ -224,7 +220,6 @@ def discover_create_factory_canisters():
     try:
         stdout = dfinity.run_cmd(cmd, timeout=60)
         for item in stdout.split('record {\n      "')[1:]:
-
             # canister_id = stdout.split('(record {"')[1].split('")')[0]
             name = item.split('1_224_700_491 = "')[1].split('";')[0]
             name = name.replace(" ", "")

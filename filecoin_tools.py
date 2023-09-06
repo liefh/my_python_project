@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import time
 import argparse, sys
 
@@ -98,12 +99,13 @@ subparser_sectors_group.add_argument('-s', '--start_group_id', type=int, help='s
 subparser_sectors_group.add_argument('-o', '--output_file', type=str,
                                      help='output a file contained sector_id and group_id')
 args = parser.parse_args()
-if args.group_count:
-    subparser_sectors_group.set_defaults(function=sectors_group_by_group)
-
-if args.sector_number:
-    subparser_sectors_group.set_defaults(function=sectors_group_by_sector)
-args = parser.parse_args()
+#
+# if args.sectors_group:
+#     subparser_sectors_group.set_defaults(function=sectors_group_by_group)
+#
+# if args.sector_number:
+#     subparser_sectors_group.set_defaults(function=sectors_group_by_sector)
+# args = parser.parse_args()
 
 try:
     if not hasattr(args, 'function'):

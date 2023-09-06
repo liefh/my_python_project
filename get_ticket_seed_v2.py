@@ -64,7 +64,6 @@ def date_uncompress_zlib(date_compressed):
 if __name__ == '__main__':
     import json
     from pathlib import Path
-
     create_sample_file()
 
     path = Path('./sectors_id')
@@ -91,18 +90,21 @@ if __name__ == '__main__':
     with open('./sectors_id', 'r') as rf:
         for sector_id in rf:
             sector_id = sector_id.strip()
-            sql = f'SELECT result from task_params where task_id in (SELECT id FROM tasks WHERE task_type=2 and sector_id={sector_id});'
+            sql = f'SELECT params from task_params where task_id in (SELECT id FROM tasks WHERE task_type=4 and sector_id={sector_id});'
             # print(sql)
             cursor.execute(sql)
             params_fetch = cursor.fetchone()
             print(params_fetch)
-            params_compressed = params_fetch['result']
-            date_decompressed = date_uncompress_zlib(params_compressed)
-            print(date_decompressed)
-            result = {'sector_id': sector_id, 'ticket': date_decompressed['ticket'], 'seed': date_decompressed['seed']}
+            params_compressed = params_fetch['params']
+            # result_compressed = params_fetch['result']
+            params_decompressed = date_uncompress_zlib(params_compressed)
+            # result_decompressed = date_uncompress_zlib(result_compressed)
+            print(params_decompressed)
+            # print(result_decompressed)
+            result = {'sector_id': sector_id, 'ticket': params_decompressed['ticket'], 'seed': params_decompressed['seed']}
             print(result)
-            with open('./ticket_seed.json', 'a+') as f:
-                json.dump(result, f)
-                f.write(',')
+            # with open('./ticket_seed.json', 'a+') as f:
+            #     json.dump(result, f)
+            #     f.write(',')
 
     cursor.close()
